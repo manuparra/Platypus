@@ -16,13 +16,13 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Platypus.  If not, see <http://www.gnu.org/licenses/>.
-from __future__ import absolute_import, division, print_function
+from __future__ import absolute_import, division#, print_function
 
 import copy
 import math
 import random
 from .core import PlatypusError, Solution, ParetoDominance, Generator, Selector, Variator, Mutation, EPSILON
-from .types import Real, Binary, Permutation, Subset
+from .types import Real, Binary, Permutation, Subset, Integer
 from .tools import add, subtract, multiply, is_zero, magnitude, orthogonalize, normalize, random_vector, zeros, roulette
 
 def clip(value, min_value, max_value):
@@ -65,7 +65,7 @@ class PM(Mutation):
         self.distribution_index = distribution_index
         
     def mutate(self, parent):
-        child = copy.deepcopy(parent)
+        child = copy.deepcopy(parent)        
         problem = child.problem
         probability = self.probability
         
@@ -80,6 +80,17 @@ class PM(Mutation):
                                                           problem.types[i].max_value)
 
                     child.evaluated = False
+            if isinstance(problem.types[i], Integer):                
+
+                if random.uniform(0.0, 1.0) <= probability:
+                    #print child.variables[i].decode()
+                    #child.variables[i],problem.types[i].decode(child.variables[i])
+                    child.variables[i]=problem.types[i].encode(
+                                        random.randint(
+                                              problem.types[i].min_value,
+                                              problem.types[i].max_value))
+                    child.evaluated = False
+
         
         return child
     
@@ -115,7 +126,7 @@ class SBX(Variator):
         if random.uniform(0.0, 1.0) <= self.probability:
             problem = child1.problem
             nvars = problem.nvars
-            
+
             for i in range(nvars):
                 if isinstance(problem.types[i], Real):
                     if random.uniform(0.0, 1.0) <= 0.5:
@@ -129,8 +140,16 @@ class SBX(Variator):
                         child1.variables[i] = x1
                         child2.variables[i] = x2
                         child1.evaluated = False
+                        child2.evaluated = False                
+                if isinstance(problem.types[i], Integer):
+                    if random.uniform(0.0, 1.0) <= 0.5:
+                        ax=child1.variables[i]
+                        bx=child2.variables[i]
+                        child1.variables[i]=bx
+                        child2.variables[i]=ax
+                        child1.evaluated = False
                         child2.evaluated = False
-                    
+
         return [child1, child2]
                     
     def sbx_crossover(self, x1, x2, lb, ub):
@@ -541,12 +560,16 @@ class BitFlip(Mutation):
         
         for i in range(problem.nvars):
             type = problem.types[i]
-            
+            print "RTYPE",type
             if isinstance(type, Binary):
                 for j in range(type.nbits):
                     if random.uniform(0.0, 1.0) <= probability:
                         result.variables[i][j] = not result.variables[i][j]
                         result.evaluated = False
+            if isinstance(type, Integer):                
+                if random.uniform(0.0, 1.0) <= probability:
+                    result.variables[i]=random.randint(problem.types[i].min_value,problem.types[i].max_value)
+                    result.evaluated = False
                         
         return result
     
@@ -559,11 +582,10 @@ class HUX(Variator):
     def evolve(self, parents):
         result1 = copy.deepcopy(parents[0])
         result2 = copy.deepcopy(parents[1])
-        problem = result1.problem
-        
+        problem = result1.problem        
         if random.uniform(0.0, 1.0) <= self.probability:
             for i in range(problem.nvars):
-                if isinstance(problem.types[i], Binary):
+                if isinstance(problem.types[i], Binary):                    
                     for j in range(problem.types[i].nbits):
                         if result1.variables[i][j] != result2.variables[i][j]:
                             if bool(random.getrandbits(1)):
@@ -571,7 +593,15 @@ class HUX(Variator):
                                 result2.variables[i][j] = not result2.variables[i][j]
                                 result1.evaluated = False
                                 result2.evaluated = False
-                                
+
+                if isinstance(problem.types[i], Integer):
+                    ax=result1.variables[i]
+                    bx=result2.variables[i]
+                    result1.variables[i]=bx
+                    result2.variables[i]=ax
+                    result1.evaluated = False
+                    result2.evaluated = False
+
         return [result1, result2]
     
 class Swap(Mutation):

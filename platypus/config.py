@@ -19,7 +19,7 @@
 from __future__ import absolute_import, division, print_function
 
 import six
-from .types import Real, Binary, Permutation, Subset
+from .types import Real, Binary, Integer, Permutation, Subset
 from .operators import GAOperator, CompoundOperator, CompoundMutation, SBX, PM, HUX, BitFlip, PMX, Insertion, Swap, SSX, Replace
 from .core import PlatypusError
 from .evaluator import MapEvaluator
@@ -31,11 +31,13 @@ class _PlatypusConfig(object):
     
         self.default_variator = {Real : GAOperator(SBX(), PM()),
                                  Binary : GAOperator(HUX(), BitFlip()),
+                                 Integer : GAOperator(HUX(), BitFlip()),
                                  Permutation : CompoundOperator(PMX(), Insertion(), Swap()),
                                  Subset : GAOperator(SSX(), Replace())}
         
         self.default_mutator = {Real : PM(),
                                 Binary : BitFlip(),
+                                Integer : BitFlip(),
                                 Permutation : CompoundMutation(Insertion(), Swap()),
                                 Subset : Replace()}
         
@@ -43,15 +45,17 @@ class _PlatypusConfig(object):
         
         self.default_log_frequency = None
         
+
 PlatypusConfig = _PlatypusConfig()
-    
+
+
 def default_variator(problem):
     if len(problem.types) == 0:
         raise PlatypusError("problem has no decision variables")
     
     base_type = problem.types[0].__class__
-    
-    if all([isinstance(t, base_type) for t in problem.types]):
+
+    if True:#all([isinstance(t, base_type) for t in problem.types]):
         if base_type in PlatypusConfig.default_variator:
             return PlatypusConfig.default_variator[base_type]
         else:
@@ -69,7 +73,7 @@ def default_mutator(problem):
     
     base_type = problem.types[0].__class__
     
-    if all([isinstance(t, base_type) for t in problem.types]):
+    if True:#all([isinstance(t, base_type) for t in problem.types]):
         if base_type in PlatypusConfig.default_mutator:
             return PlatypusConfig.default_mutator[base_type]
         else:
