@@ -8,7 +8,9 @@
 MOEAC-Solver is a framework for evolutionary computing in Python with a focus on multiobjective evolutionary algorithms (MOEAs).  It differs from existing optimization libraries, including PyGMO, Inspyred, DEAP, and Scipy, by providing optimization algorithms and analysis tools for multiobjective optimization. It currently supports NSGA-II, NSGA-III, MOEA/D, IBEA, Epsilon-MOEA, SPEA2, GDE3, OMOPSO, SMPSO, and Epsilon-NSGA-II. 
 
 
-### Example 2
+### Example
+
+This example covers the next:
 
 Objetive distance + material capacity : penalizing material movements to embankments far from the embankment 1.
 
